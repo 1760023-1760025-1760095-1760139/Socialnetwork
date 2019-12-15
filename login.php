@@ -1,58 +1,80 @@
 <?php 
   require_once 'init.php';
-
-?>
-<?php include 'header.php'; ?>
-<?php if(isset($_POST['email']) && isset($_POST['password'])): ?>
-<?php
-$email = $_POST['email'];
-$password = $_POST['password'];
-$success = false;
-
-$user = findUserByEmail($email);
-if($user && password_verify($password, $user['password'])){
-	$success = true;
-	$_SESSION['userId'] = $user['id'];
+	require_once 'functions.php';
+	$page = 'login';
+if($currentUser)
+{
+	header('Location: index.php');
+    exit();
 }
+
 ?>
 
-<?php if($success):?>
-<div class ="alert alert-primary" role="alert">
-	Đăng nhập thành công
-	</div>
-<?php else: ?>
-<div class ="alert alert-danger" role="alert">
-	Đăng nhập thất bại
-	</div>
-<?php endif; ?>
-<?php else: ?>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-<BODY>
-	<div class="container"> 
-	<h1>Đăng nhập</h1>
-		<form action="login.php" method="POST">
-			<div class ="form-group">
-				<label for="email" > Email </label>
-				 <input type="email" class="form-control" id ="email" name="email" placeholder = "Tên đăng nhập ">
-			</div>
-			<div class ="form-group">
-				<label for="password" > Mật khẩu </label>
-				 Password: <input type="password" class="form-control" id ="password" name="password" placeholder = "Mật khẩu"><br><br>
-				 <input type="checkbox" onclick="myFunction()">Show Password
-				 <script>
-                    function myFunction() {
-                      var x = document.getElementById("password");
-                      if (x.type === "password") {
-                        x.type = "text";
-                      } else {
-                        x.type = "password";
-                      }
-                    }
-                    </script>
-				 
-			</div>
-			<button type="submit" class="btn btn-primary">
-			Đăng nhập</button>
-		</form>
-<?php endif; ?>
+<?php include 'header.php'; ?>
+
+ <h1 style="text-align: center;">Đăng nhập</h1>
+<div class="card" style="width: 70%	; margin: 0 auto;">
+  <div class="card-body">
+	<form method="POST" >
+	  	<div class="form-group"> 
+	    <label style="font-weight: bold; font-size: 20px;" for="email">Email</label>
+	    <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Nhập email" autocomplete="off" Required>
+	 </div>
+	  <div class="form-group">
+	    <label  style="font-weight: bold; font-size: 20px;" for="password">Mật khẩu</label>
+	    <input type="password" class="form-control" id="password" name ="password" placeholder="Nhập mật khẩu" autocomplete="off" >
+	  </div>
+	  <div style="text-align: center;">
+	  <button type="submit" name="log-submit" class="btn btn-dark">Đăng nhập</button>
+	  </div>
+	  </div>
+	  <?php 
+
+				if(isset($_POST['email'])&& isset($_POST['password']))
+				{
+					
+					$password = $_POST['password'];
+					$email = $_POST['email'];
+					$user = findUserByEmail($email);
+					if($user)
+					{
+						if($user['verified']==1)
+						{
+								$checkpass = password_verify($password,$user['password']);
+								if($checkpass)
+								{
+									$_SESSION['userId'] = $user['id'];
+									header('Location: index.php');
+									exit();
+								}
+								else
+								{
+									echo '<div style="text-align: center;"><p style="color:#ba2e35; ">Sai email hoặc mật khẩu</p></div>';
+									
+								}
+						}
+						else
+						{
+								$verify =  findVerifyByUserId($user['id']);
+								header('Location: verify-email.php?secret='.$verify['secret'].'&id='.$verify['userId'].'');
+						}
+					}
+					else
+					{
+						echo '<div style="text-align: center;"><p style="color:#ba2e35; ">Sai email hoặc mật khẩu</p></div>';
+						
+					}	
+				}
+
+		?>
+				<br>
+				<div style="text-align: center;color:black">
+				<a href="register.php" >Chưa có tài khoản? Đăng ký ngay!</a><br>	
+				<a href="forgot-password.php" >Quên mật khẩu!</a>
+				</div>
+	</form>
+ </div>
+</div>
+</div>
+	
 <?php include 'footer.php'; ?>

@@ -1,5 +1,6 @@
-<?php 
-  require_once 'init.php';
-  
-  unset($_SESSION['userId']);
-  header('Location : index.php');
+<?php
+	Session_start();
+	unset($_SESSION['userId']);
+	header('Location: index.php');
+	exit();
+ ?>	

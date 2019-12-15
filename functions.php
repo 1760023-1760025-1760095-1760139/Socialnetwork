@@ -1,100 +1,689 @@
-<?php
-function sum($a,$b)
-{
-	$c = $a + $b;
-	return $c;
-}
+<?php 
 
-function detectPage()
-{
-	$uri = $_SERVER ['REQUEST_URI'];
-$parts = explode('/', $uri);
-$fileName = $parts[2];
-$parts = explode('.', $fileName);
-$page = $parts[0];
-return $page;
-}
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
 
-function findUserByEmail($email)
-{
-	global $db;
-	$stmt = $db->prepare("SELECT * FROM users WHERE email = ?");
-	$stmt->execute(array($email));
-	return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+ob_start();
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
 
 function findUserById($id)
 {
-	global $db;
-	$stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM users WHERE id=? LIMIT 1');
 	$stmt->execute(array($id));
+	$user =  $stmt->fetch(PDO::FETCH_ASSOC);
+	return $user;
+}
+
+function findEmailById($id)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT email FROM users WHERE id= ? LIMIT 1');
+	$stmt->execute(array($id));
+	$user =  $stmt->fetch(PDO::FETCH_ASSOC);
+	return $user;
+}
+
+
+function findUserByEmail($email)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM users WHERE email=? LIMIT 1');
+	$stmt->execute(array($email));
+	$user =  $stmt->fetch(PDO::FETCH_ASSOC);
+	return $user;
+}
+
+function KiemTraTonTaiEmail($email)
+{
+	GLOBAL $db;
+	$stmt = $db->query('SELECT * FROM users');
+	while($row = $stmt->fetch(PDO::FETCH_ASSOC)) 
+	{ 
+		if($row['email']==$email)
+		{
+			return true;
+		}
+	}
+	return false;
+ 
+}
+function KiemTraTonTaiUser($user)
+{
+	GLOBAL $db;
+	$stmt = $db->query('SELECT * FROM users');
+	while($row = $stmt->fetch(PDO::FETCH_ASSOC)) 
+	{ 
+		if($row['username']==$user)
+		{
+			return true;
+		}
+	}
+	return false;
+ 
+}
+
+ function CreateUserNoVerify($user,$email,$password)
+ {
+ 	GLOBAL $db;
+	$stmt = $db->prepare("INSERT INTO users(username,email,password,verified) VALUES(?,?,?,0)");
+	$stmt->execute(array($user,$email,$password));
+	
+	// $stmt = $db->prepare('SELECT * FROM users WHERE email= ? LIMIT 1');
+	// $stmt->execute(array($email));
+	// $userId =  $stmt->fetch(PDO::FETCH_ASSOC);
+	// $file = $_FILES['image/avatar-navbar.jpg']
+	// move_uploaded_file($file, 'uploads/' .$userId['id'] .'.jpg');
+ }
+
+
+function addPost($userId,$content,$privacyNum)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare("INSERT INTO post(userId,content,privacy) VALUES(?,?,?)");
+	$stmt->execute(array($userId,$content,$privacyNum));	
+}
+
+function addPicture($userId,$content,$pictureId)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare("INSERT INTO post(userId,content,pictureId) VALUES(?,?,?)");
+	$stmt->execute(array($userId,$content,$pictureId));
+}
+
+function findAllPost()
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM post ORDER BY createdAt DESC' );
+	$stmt->execute();
+	$posts = $stmt->fetchALL(PDO::FETCH_ASSOC);
+	return $posts;
+	
+}
+
+
+function randomString($length)
+{
+	$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+
+function randomNumber($length)
+{
+	$characters = '0123456789';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+
+
+
+function createResetPassword($userId)
+{
+	GLOBAL $db;
+	$secret = randomString(10);
+	$stmt = $db->prepare("INSERT INTO resetpassword(userId,secret, used) VALUES(?,?,0)");
+	$stmt->execute(array($userId,$secret));
+	return $secret;
+}
+
+function createVerifyEmail($userId,$code)
+{
+	GLOBAL $db;
+	$secret = randomString(10);
+	$stmt = $db->prepare("INSERT INTO verifyemail(userId,secret,code,used) VALUES(?,?,?,0)");
+	$stmt->execute(array($userId,$secret,$code));
+	return $secret;
+}
+ 
+function sentEmail($email,$receiver,$subject,$content)
+{
+	$mail = new PHPMailer(true);                              // Passing `true` enables exceptions
+	// try {
+		//Server settings
+		// $mail->SMTPDebug = 2;                                 // Enable verbose debug output
+		$mail->isSMTP();                                      // Set mailer to use SMTP
+		$mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
+		$mail->SMTPAuth = true;                               // Enable SMTP authentication
+		$mail->Username = 'nguyenthiyennhi27101999@gmail.com'; //cai khac cai nay ay                // SMTP username
+		$mail->Password = '312397713YN';                           // SMTP password
+		$mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+		$mail->Port = 587;                                    // TCP port to connect to
+		//
+		//Recipients
+		$mail->setFrom('nguyenthiyennhi27101999@gmail.com', 'PEACE');
+		$mail->addAddress($email,$receiver);     // Add a recipient
+	
+	
+		//Content
+		$mail->isHTML(true);// Set email format to HTML
+		$mail->Subject = $subject;
+		$mail->Body    = $content;
+		$mail->send();
+		// return true;
+	// } 
+	// catch (Exception $e) {
+	// 	return false;
+	// }
+}
+
+//Reset Password
+function findResetPassword($secret)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM resetpassword WHERE secret =? LIMIT 1');
+	$stmt->execute(array($secret));
+	return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+function updatePassword($userId, $password)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare("UPDATE users SET password=? WHERE id= ?");
+	$stmt->execute(array($password,$userId));
+}
+
+function markSecretUsed($secret)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare("UPDATE resetpassword SET used = 1 WHERE secret = ? ");
+	$stmt->execute(array($secret));
+}
+
+//Confirm Email Register
+// Tìm secret khi login mà tài khoản chưa xác thực
+function findVerifyByUserId($userId)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM verifyemail WHERE userId =? LIMIT 1');
+	$stmt->execute(array($userId));
 	return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-function updateUserPassword($id,$password)
+function findVerifyBySecret($secret)
 {
-	global $db;
-	$hashPassword = password_hash($password,PASSWORD_DEFAULT);
-	$stmt = $db->prepare("UPDATE users SET password = ? WHERE id = ?");
-    return $stmt->execute(array($hashPassword, $id));
-   
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM verifyemail WHERE secret =? LIMIT 1');
+	$stmt->execute(array($secret));
+	return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-function createUser($displayname, $email, $password)
+function deleteVerify($secret)
 {
-	global $db;
-	$hashPassword = password_hash($password,PASSWORD_DEFAULT);
-	$stmt = $db->prepare("INSERT INTO users (displayname, email, password)  VALUES (?,?,?)");
-    $stmt->execute(array($displayname, $email, $hashPassword));
-   return $db->lastInsertId();
+	GLOBAL $db;
+	$stmt = $db->prepare("DELETE FROM verifyemail WHERE secret = ?");
+	$stmt->execute(array($secret));
 }
 
-function updateUserProfile($id, $displayname)
+function updateVerifyState($userId)
 {
-	global $db;
-	$stmt = $db->prepare("UPDATE users SET displayname = ? WHERE id = ?");
-    return $stmt->execute(array($displayname, $id));
+	GLOBAL $db;
+	$stmt = $db->prepare("UPDATE users SET verified= 1 WHERE id= ?");
+	$stmt->execute(array($userId));
 }
 
-function resizeImage($filename, $max_width, $max_height)
+function resizeImage($file, $w, $h, $crop=FALSE,$out) {
+    list($width, $height) = getimagesize($file);
+    $r = $width / $height;
+    if ($crop) {
+        if ($width > $height) {
+            $width = ceil($width-($width*abs($r-$w/$h)));
+        } else {
+            $height = ceil($height-($height*abs($r-$w/$h)));
+        }
+        $newwidth = $w;
+        $newheight = $h;
+    } else {
+        if ($w/$h > $r) {
+            $newwidth = $h*$r;
+            $newheight = $h;
+        } else {
+            $newheight = $w/$r;
+            $newwidth = $w;
+        }
+    }
+    $src = imagecreatefromjpeg($file);
+    $dst = imagecreatetruecolor($newwidth, $newheight);
+    imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+	imagejpeg($dst, $out);
+}
+
+
+function findRelationship($user1Id, $user2Id)
 {
-  list($orig_width, $orig_height) = getimagesize($filename);
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM relationship WHERE user1Id = ? AND user2Id = ? OR  user1Id = ? AND user2Id=?');
+	$stmt->execute(array($user1Id, $user2Id, $user2Id, $user1Id));
+	$relationship = $stmt->fetchALL(PDO::FETCH_ASSOC);
+	return $relationship;
+}
 
-  $width = $orig_width;
-  $height = $orig_height;
+function addRelationship($user1Id, $user2Id)
+{
+	
+	GLOBAL $db;
+	$stmt = $db->prepare('INSERT INTO relationship (user1Id,user2Id) VALUES (?,?) ');
+	$stmt->execute(array($user1Id, $user2Id));
+}
 
-  # taller
-  if ($height > $max_height) {
-      $width = ($max_height / $height) * $width;
-      $height = $max_height;
+function removeRelationship($user1Id, $user2Id)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('DELETE FROM relationship WHERE user1Id = ? AND user2Id = ? OR  user1Id = ? AND user2Id=?');
+	$stmt->execute(array($user1Id, $user2Id, $user2Id, $user1Id));
+}
+
+function findAllFriend($userId)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare("SELECT DISTINCT f1.user2Id FROM relationship AS f1 JOIN relationship AS f2  ON  f1.user2Id = f2.user1Id WHERE f1.user1Id = ?");
+	$stmt->execute(array($userId));
+	$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$friends = array();
+	foreach($rows AS $row)
+	{
+		$friends[] = $row['user2Id'];
+	}
+	return $friends;
+}
+
+
+function findAllPostOfFriends($userId)
+{
+	GLOBAL $db;
+	$friendIds = findAllFriend($userId);
+	//$friendIds[] =$userId;
+	// $stmt = $db->prepare('SELECT * FROM post  WHERE userId IN ('.str_pad('',count($friendIds)*2-1,'?,').') AND privacy = 1 OR privacy = 2  ORDER BY createdAt DESC');
+	$stmt = $db->prepare('SELECT * FROM post WHERE userId IN (SELECT DISTINCT f1.user2Id FROM relationship AS f1 JOIN relationship AS f2 ON f1.user2Id = f2.user1Id WHERE f1.user1Id = ?) AND (privacy = 1 OR privacy = 2) UNION ALL SELECT * FROM post p2 WHERE p2.userId= ? ORDER BY createdAt DESC
+');
+	$stmt->execute(array($userId,$userId));
+	$posts = $stmt->fetchALL(PDO::FETCH_ASSOC);
+	return $posts;
+	 
+}
+
+
+
+function findAllPostOfUser($userId)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM post  WHERE userId = ? ORDER BY createdAt DESC');
+	$stmt->execute(array($userId));
+	$posts = $stmt->fetchALL(PDO::FETCH_ASSOC);
+	return $posts;
+	 
+}
+
+function findAllPostOfUserVisiting($userId,$isFriend)
+{
+	// Xét điều kiện lọc bài viết
+	if($isFriend == true)
+	{
+		$condition = '(privacy = 1 OR privacy = 2)';
+	}
+	else
+	{
+		$condition = 'privacy = 1';
+	}
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM post  WHERE userId = ? AND '.$condition.' ORDER BY createdAt DESC');
+	$stmt->execute(array($userId));
+	$posts = $stmt->fetchALL(PDO::FETCH_ASSOC);
+	return $posts;
+	 
+}
+
+function findUsernameById($userId)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare("SELECT username from users where userId = ?");
+	$stmt->execute(array($userId));
+	$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+//Đếm bạn chung
+function countMutualFriend($userId1,$userId2)
+{
+	$index = 0;
+	$friends1 = findAllFriend($userId1);
+	$friends2 = findAllFriend($userId2);	
+	foreach($friends1 AS $friend1)
+	{
+		foreach($friends2 AS $friend2)
+		{
+			if($friend2 == $friend1)
+			{
+				$index++;
+			}
+		}
+	}
+	return $index;
+}
+
+function searchFriendByName($name,$currentUser)
+{
+	GLOBAL $db;
+	//$query = 'SELECT us.id,us.username FROM users as us where us.username like :keyword ORDER BY (SELECT COUNT(*) From (SELECT DISTINCT f1.user2Id as id1 FROM relationship AS f1 JOIN relationship AS f2  ON  f1.user2Id = f2.user1Id WHERE f1.user1Id = 29) as T1 JOIN (SELECT DISTINCT f3.user2Id as id2 FROM relationship AS f3 JOIN relationship AS f4  ON  f3.user2Id = f4.user1Id WHERE f3.user1Id = us.id) as t2 WHERE t1.id1 = t2.id2) DESC';
+	$query = 'SELECT us.id,us.username FROM users as us where us.username like :keyword ORDER BY us.username DESC';
+	$stmt = $db->prepare($query);
+	$stmt->bindValue(':keyword', '%' . $name . '%', PDO::PARAM_STR);
+	$stmt->execute();
+	$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	return $rows;
+}
+
+function searchPostByString($string)
+{
+	GLOBAL $db;
+	$query = 'SELECT * FROM post where content like :keyword  ORDER BY privacy';
+	$stmt = $db->prepare($query);
+	$stmt->bindValue(':keyword', '%' . $string . '%', PDO::PARAM_STR);
+	$stmt->execute();
+	$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	return $rows;
+}
+
+
+function isFriend($user1Id, $user2Id)
+{
+    $relationship = findRelationship($user1Id, $user2Id);
+    $isFriend = count($relationship) === 2;
+    return $isFriend;
+}
+
+
+// comment post by phuong
+
+function getAllCommentOfPost($post_id)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM comments WHERE post_id= ? ORDER BY created_at DESC');
+	$stmt->execute(array($post_id));
+	$comments = $stmt->fetchALL(PDO::FETCH_ASSOC);
+	return $comments;
+}
+function InsetComment($post_id,$user_id,$comment_text)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare("INSERT INTO comments (post_id, user_id, body, created_at, updated_at) 
+	VALUES (?,?,?, now(), null)");
+	$stmt->execute(array($post_id,$user_id,$comment_text));
+}
+function getCommentsCountByPostId($post_id)//
+{
+	global $db;
+	$stmt = $db->prepare("SELECT COUNT(*) FROM comments WHERE post_id=?");
+	$stmt->execute(array($post_id));
+	$data = $stmt->fetchColumn(0);
+	return $data;
+}
+function getCommentByID($id)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM comments WHERE id=? LIMIT 1');
+	$stmt->execute(array($id));
+	$comment =  $stmt->fetch(PDO::FETCH_ASSOC);
+	return $comment;
+}
+//reply comment by phuong
+
+function getAllRepliesOfComment($comment_id)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM replies WHERE comment_id= ?');
+	$stmt->execute(array($comment_id));
+	$replies = $stmt->fetchALL(PDO::FETCH_ASSOC);
+	return $replies;
+}
+function insertReplyInComment($user_id , $comment_id, $reply_text)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare("INSERT INTO replies (user_id, comment_id, body, created_at, updated_at)
+	VALUES (?,?,?, now(), null)");
+	$stmt->execute(array($user_id , $comment_id, $reply_text));
+}
+function getRepLyByID($id)
+{
+	GLOBAL $db;
+	$stmt = $db->prepare('SELECT * FROM replies WHERE id=?');
+	$stmt->execute(array($id));
+	$reply =  $stmt->fetch(PDO::FETCH_ASSOC);
+	return $reply;
+}
+
+
+date_default_timezone_set('Asia/Kolkata');
+
+function fetch_user_last_activity($user_id, $db)
+{
+	$query = "
+	SELECT * FROM login_details 
+	WHERE user_id = '$user_id' 
+	ORDER BY last_activity DESC 
+	LIMIT 1
+	";
+	$statement = $db->prepare($query);
+	$statement->execute();
+	$result = $statement->fetchAll();
+	foreach($result as $row)
+	{
+		return $row['last_activity'];
+	}
+}
+
+function fetch_user_chat_history($from_user_id, $to_user_id, $db)
+{
+	$query = "
+	SELECT * FROM chat_message 
+	WHERE (from_user_id = '".$from_user_id."' 
+	AND to_user_id = '".$to_user_id."') 
+	OR (from_user_id = '".$to_user_id."' 
+	AND to_user_id = '".$from_user_id."') 
+	ORDER BY timestamp DESC
+	";
+	$statement = $db->prepare($query);
+	$statement->execute();
+	$result = $statement->fetchAll();
+	$output = '<ul class="list-unstyled">';
+	foreach($result as $row)
+	{
+		$user_name = '';
+		if($row["from_user_id"] == $from_user_id)
+		{
+			$user_name = '<b class="text-success">You</b>';
+		}
+		else
+		{
+			$user_name = '<b class="text-danger">'.get_user_name($row['from_user_id'], $db).'</b>';
+		}
+		$output .= '
+		<li style="border-bottom:1px dotted #ccc">
+			<p>'.$user_name.' - '.$row["chat_message"].'
+				<div align="right">
+					- <small><em>'.$row['timestamp'].'</em></small>
+				</div>
+			</p>
+		</li>
+		';
+	}
+	$output .= '</ul>';
+	$query = "
+	UPDATE chat_message 
+	SET status = '0' 
+	WHERE from_user_id = '".$to_user_id."' 
+	AND to_user_id = '".$from_user_id."' 
+	AND status = '1'
+	";
+	$statement = $db->prepare($query);
+	$statement->execute();
+	return $output;
+}
+
+function get_user_name($user_id, $db)
+{
+	$query = "SELECT username FROM login WHERE user_id = '$user_id'";
+	$statement = $db->prepare($query);
+	$statement->execute();
+	$result = $statement->fetchAll();
+	foreach($result as $row)
+	{
+		return $row['username'];
+	}
+}
+
+function count_unseen_message($from_user_id, $to_user_id, $db)
+{
+	$query = "
+	SELECT * FROM chat_message 
+	WHERE from_user_id = '$from_user_id' 
+	AND to_user_id = '$to_user_id' 
+	AND status = '1'
+	";
+	$statement = $db->prepare($query);
+	$statement->execute();
+	$count = $statement->rowCount();
+	$output = '';
+	if($count > 0)
+	{
+		$output = '<span class="label label-success">'.$count.'</span>';
+	}
+	return $output;
+}
+
+function fetch_is_type_status($user_id, $db)
+{
+	$query = "
+	SELECT is_type FROM login_details 
+	WHERE user_id = '".$user_id."' 
+	ORDER BY last_activity DESC 
+	LIMIT 1
+	";	
+	$statement = $db->prepare($query);
+	$statement->execute();
+	$result = $statement->fetchAll();
+	$output = '';
+	foreach($result as $row)
+	{
+		if($row["is_type"] == 'yes')
+		{
+			$output = ' - <small><em><span class="text-muted">Typing...</span></em></small>';
+		}
+	}
+	return $output;
+}
+
+function fetch_group_chat_history($db)
+{
+	$query = "
+	SELECT * FROM chat_message 
+	WHERE to_user_id = '0'  
+	ORDER BY timestamp DESC
+	";
+
+	$statement = $db->prepare($query);
+
+	$statement->execute();
+
+	$result = $statement->fetchAll();
+
+	$output = '<ul class="list-unstyled">';
+	foreach($result as $row)
+	{
+		$user_name = '';
+		if($row["from_user_id"] == $_SESSION["user_id"])
+		{
+			$user_name = '<b class="text-success">You</b>';
+		}
+		else
+		{
+			$user_name = '<b class="text-danger">'.get_user_name($row['from_user_id'], $db).'</b>';
+		}
+
+		$output .= '
+
+		<li style="border-bottom:1px dotted #ccc">
+			<p>'.$user_name.' - '.$row['chat_message'].' 
+				<div align="right">
+					- <small><em>'.$row['timestamp'].'</em></small>
+				</div>
+			</p>
+		</li>
+		';
+	}
+	$output .= '</ul>';
+	return $output;
+}
+
+
+
+function getBaseUrl(){
+	if(isset($_SERVER['HTTPS'])){
+        $protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
+    }
+    else{
+        $protocol = 'http';
+    }
+    return $protocol . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+}
+
+function getPageTitle($page,$userId){
+	$title = 'PEACE';
+	if ($page === 'index')
+  {
+    $title = 'Trang chủ';
   }
-
-  # wider
-  if ($width > $max_width) {
-      $height = ($max_width / $width) * $height;
-      $width = $max_width;
+  else if ($page === 'login')
+  {
+    $title = 'Đăng nhập';
   }
-
-  $image_p = imagecreatetruecolor($width, $height);
-
-  $image = imagecreatefromjpeg($filename);
-
-  imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $orig_width, $orig_height);
-
-  return $image_p;
+  else if ($page === 'register')
+  {
+    $title = 'Đăng ký';
+  }
+  else if ($page === 'personal')
+  {
+    $title = 'Trang cá nhân';
+  }
+  else if ($page === 'profile' || $page ==='listfriend')
+  {
+    $usernameProfile = findUserById($userId);
+    $title = $usernameProfile['username'];
+  }
+  else if ($page === 'forgot-password')
+  {
+    $title = 'Quên mật khẩu';
+  }
+  else if ($page === 'reset-password')
+  {
+    $title = 'Đổi mật khẩu';
+  }
+  else if ($page === 'search-friend')
+  {
+    $title='Tìm kiếm';
+  }
+  else if($page ==='verify-email')
+  {
+    $title ='Xác thực tài khoản';
+  }
+  else if ($page='result')
+  {
+    $title= 'Kết quả tìm kiếm';
+  }
+  else if ($page === 'messenger')
+  {
+    $title = 'Messenger';
+  }
+  return $title;
 }
-
-function getNewFeeds()
-{
-	global $db;
-	$stmt = $db->query ("SELECT p.*, u.displayName FROM posts AS p JOIN users AS u ON p.userid = u.id ORDER BY createAt DESC");
-	return $stmt->fetchall(PDO::FETCH_ASSOC);
-}
-function createPost($userid, $content){
-	global $db;
-	$hashPassword = password_hash($password, PASSWORD_DEFAULT);
-	$stmt = $db->prepare("INSERT INTO posts ( content, userid) VALUES (?, ?)");
-    $stmt->execute (array($content, $userid));
-    return $db->lastInsertId();
-}
-
+ob_flush();
