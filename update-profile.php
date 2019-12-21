@@ -39,7 +39,7 @@ if (isset($_FILES['avatar'])){
 
 
 <div class ="alert alert-danger" role="alert">
-	Cập nhật thông tin thất bại
+	Cập Nhật Thông Tin Thất Bại
 </div>
 <?php endif; ?>
 <?php else: ?>
