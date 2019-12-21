@@ -47,7 +47,7 @@
 			<br />
 			<div class="row">
 				<div class="col-md-8 col-sm-6">
-					<h4>Bạn bè của bạn đang online</h4>
+					<h4>Bạn Bè Đang Online </h4>
 				</div>
 				<div class="col-md-2 col-sm-3">
 					<input type="hidden" id="is_active_group_chat_window" value="no" />
