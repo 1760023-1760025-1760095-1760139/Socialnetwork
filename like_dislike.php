@@ -1,17 +1,12 @@
 <?php 
   require_once 'init.php';
-// connect to database
 $conn = mysqli_connect('localhost', 'root', '', 'peace');
 
-// lets assume a user is logged in with id $user_id
 $user_id = $currentUser['id'];
-//echo($user_id);
 if (!$conn) {
   die("Error connecting to database: " . mysqli_connect_error($conn));
   exit();
 }
-
-// if user clicks like or dislike button
 if (isset($_POST['action'])) {
   $post_id = $_POST['post_id'];
   $action = $_POST['action'];
@@ -36,13 +31,12 @@ if (isset($_POST['action'])) {
   		break;
   }
 
-  // execute query to effect changes in the database ...
   mysqli_query($conn, $sql);
   echo getRating($post_id);
   exit(0);
 }
 
-// Get total number of likes for a particular post
+
 function getLikes($id)
 {
   global $conn;
@@ -52,18 +46,6 @@ function getLikes($id)
   $result = mysqli_fetch_array($rs);
   return $result[0];
 }
-// function getLikes($id)
-// {
-//   global $db;
-//   $sql = "SELECT COUNT(*) FROM rating_info 
-//   		  WHERE post_id = $id AND rating_action='like'";
-//   $rs = $db->query($sql);
-//   $rs->execute();
-//   $result =  $rs->fetchColumn(PDO::FETCH_ASSOC);
-//   //$result = mysqli_fetch_array($rs);
-//   return $result[0];
-// }
-// Get total number of dislikes for a particular post
 function getDislikes($id)
 {
   global $conn;
@@ -74,19 +56,6 @@ function getDislikes($id)
   return $result[0];
 }
 
-// function getDislikes($id)
-// {
-//   global $db;
-//   $sql = "SELECT COUNT(*) FROM rating_info 
-//   WHERE post_id = $id AND rating_action='dislike'";
-//   $rs = $db->query($sql);
-//   $rs->execute();
-//   $result =  $rs->fetchColumn(PDO::FETCH_ASSOC);
-//   //$result = mysqli_fetch_array($rs);
-//   return $result[0];
-// }
-
-// Get total number of likes and dislikes for a particular post
 function getRating($id)
 {
   global $conn;
@@ -105,7 +74,6 @@ function getRating($id)
   return json_encode($rating);
 }
 
-// Check if user already likes post or not
 function userLiked($post_id)
 {
   global $conn;
@@ -120,7 +88,6 @@ function userLiked($post_id)
   }
 }
 
-// Check if user already dislikes post or not
 function userDisliked($post_id)
 {
   global $conn;
@@ -137,6 +104,4 @@ function userDisliked($post_id)
 
 $sql = "SELECT * FROM post";
 $result = mysqli_query($conn, $sql);
-// fetch all posts from database
-// return them as an associative array called $posts
 $posts = mysqli_fetch_all($result, MYSQLI_ASSOC);
