@@ -28,25 +28,20 @@
   }
 
 ?>
-<!-- add Jquery -->
+
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="script.js"></script>
-
-<!-- styling -->
-
-
 <?php include 'header.php';?>
 <?php if(!$currentUser):?>
 <div class="card" style="width: 80% ; margin: 0 auto;">
   <div class="card-body">
-             <p style="font-weight:bold; font-size:20px; text-align:center; font-family:sans-serif; color:black;">Chào mừng đến với website. Vui lòng đăng nhập để tiếp tục</p>
+             <p style="font-weight:bold; font-size:20px; text-align:center; font-family:sans-serif; color:black;">Chào mừng đến với Peace. Vui lòng đăng nhập để tiếp tục</p>
              <div style="text-align: center;">
                 <a class="btn btn-dark" href="login.php" role="button">Đăng nhập</a>
                 <a class="btn btn-dark" href="register.php" role="button">Đăng ký</a>
-
-            </div>
+            </div>          
   </div>
 </div>
 <?php else:?>
@@ -111,7 +106,7 @@
                           
                           &nbsp;&nbsp;&nbsp;&nbsp;
 
-                        <!-- if user dislikes post, style button differently -->
+                      
                           <i 
                             <?php if (userDisliked($post['id'])): ?>
                               class="fa fa-thumbs-down dislike-btn"
@@ -132,12 +127,10 @@
 
                   <a><span id="comments_count_<?php echo $post['id'] ?>"><?php echo count($comments) ?></span> bình luận</a>
                   <hr>
-                  <!-- comments wrapper -->
+                
                   <div id="comments_wrapper_<?php echo $post['id']; ?>">
                     <?php if (isset($comments)): ?>
-                    <!-- Display comments -->
                       <?php foreach ($comments as $comment): ?>
-                      <!-- comment -->
                       <div class="comment clearfix">
                         <div class="comment-details">
                         <img style="width: 30px;height: 30px; border-radius: 50%;" src="uploads/<?php echo $comment['user_id'];?>.jpg">
@@ -147,25 +140,18 @@
                           <a class="reply-btn"  href="#" data-id="<?php echo $comment['id']; ?>">Viết phản hồi</a>
 
                           </div>
-
-                        <!-- reply form -->
                         <form style="display: none;" action="index.php" class="reply_form clearfix" id="comment_reply_form_<?php echo $comment['id'] ?>" data-id="<?php echo $comment['id']; ?>">
                           <textarea class="form-control" name="reply_text" id="reply_text" cols="30" rows="1"></textarea>
                           <button class="btn btn-primary btn-xs pull-right submit-reply">Viết phản hồi</button>
 
                         </form>
-
-                        <!-- GET ALL REPLIES -->
                         <?php $replies = getAllRepliesOfComment($comment['id']) ?>
                         <div class="replies_wrapper_<?php echo $comment['id']; ?>">
                           <?php if (isset($replies)): ?>
                             <?php foreach ($replies as $reply): ?>
-                              <!-- reply -->
+                        
                               <div class="comment reply clearfix">
-
-                                <!-- <img src="profile.png" alt="" class="profile_pic"> -->
                                 <div class="comment-details">
-
                                   <span class="comment-name"><b><?php echo findUserById($reply['user_id'])['username'] ?></b></span>
                                   <span class="comment-date"><?php echo date("F j, Y ", strtotime($reply["created_at"])); ?></span>
                                   <p style="margin-left: 40px;"><?php echo $reply['body']; ?></p>
@@ -180,15 +166,10 @@
                     <?php else: ?>
                       <a>Hãy trở thành người đầu tiên bình luận cho bài viết này</a>
                     <?php endif ?>
-                  </div><!-- comments wrapper -->
-                  </div><!-- // all comments -->
-                        <!-- end comment3 -->
-                
-
-          
+                  </div>
+                </div>
         </div>
       </div>
       <?php endforeach; ?>
 <?php endif;?>
-
 <?php include 'footer.php'; ?>
