@@ -2,7 +2,6 @@
   require_once 'init.php';
   require_once 'functions.php';
   require_once 'like_dislike.php';
-  require_once 'comment.php';
 
   $page = 'personal';  
   $posts = findAllPostOfUser($currentUser['id']);
@@ -14,9 +13,13 @@
   } 
 ?>
 
-<link rel="stylesheet" href="style.css">
+<!-- add Jquery -->
+<link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-<script src="script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="script_like.js"></script>
+
+<!-- styling -->
 
 <?php include 'header.php'; ?>
     <div class="container" style="margin-top: 10%;">
@@ -30,17 +33,16 @@
             <div>
               <form method="POST">
                 <!-- <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#popup">Cập nhật ảnh đại diện</button>               -->
-                <button type="submit" class="btn btn-white" data-toggle="modal" name="update-avatar" id="update-avatar">Cập nhật ảnh đại diện</button>
+                <button type="submit" class="btn btn-dark" data-toggle="modal" name="update-avatar" id="update-avatar">Cập nhật ảnh đại diện</button>
                 <input type="file"  name="upload_avatar" id="upload_avatar" multiple style="display: none;">
               </form>
             </div>
           </div>
           <div class="card" >
             <form method="POST">
-            
             <div class="row">
               <div class="col-sm">
-                <button type="button" class="btn btn-link"name="timeline-btn" id="timeline-btn" style=" text-decoration: none">Dòng thời gian</button>
+                <button type="button" class="btn btn-link" name="timeline-btn" id="timeline-btn" style=" text-decoration: none;">Dòng thời gian</button>
               </div>
               <div class="col-sm">
                 <button type="button" class="btn btn-link" name="about-btn" id="about-btn" style=" text-decoration: none;">Thông tin cá nhân</button>
@@ -48,7 +50,6 @@
               <div class="col-sm">
                 <button type="button" class="btn btn-link" name="friendlist-btn" id="friendlist-btn" style=" text-decoration: none;">Bạn bè</button>
               </div>
-            
             </form>
           </div>
          </div>
@@ -81,7 +82,7 @@
     	</div>
     </div>
 </div>
-
+<!--End of modal-dialog-->
 
 <div class="container" id="personal-main">
   <div id="about-user"></div>
@@ -99,100 +100,44 @@
               </h5>
               <h6 class="card-subtitle mb-2 text-muted" ><?php echo $post['createdAt']; ?></h6>
               <p class="card-text"><?php echo $post['content']; ?></p>
-  
-           <div class ="post">
-                  <div class="post-info">
-                  <i <?php if (userLiked($post['id'])): ?>
-                              class="fa fa-thumbs-up like-btn"
-                            <?php else: ?>
-                              class="fa fa-thumbs-o-up like-btn" 
-                            <?php endif ?>
-                            
-                            data-id="<?php echo $post['id'] ?>"></i>
-                          
-                            <span class="likes"><?php   echo getLikes($post['id']); ?></span>
-                          
-                          &nbsp;&nbsp;&nbsp;&nbsp;
-
+              <!-- <a href="#" class="card-link">Thích</a> -->
+               <!-- phuong_like -->
+          <div class ="post">
+              <div class="post-info">
+               <i <?php if (userLiked($post['id'])): ?>
+                          class="fa fa-thumbs-up like-btn"
+                        <?php else: ?>
+                          class="fa fa-thumbs-o-up like-btn" 
+                        <?php endif ?>
                         
-                          <i 
-                            <?php if (userDisliked($post['id'])): ?>
-                              class="fa fa-thumbs-down dislike-btn"
-                            <?php else: ?>
-                              class="fa fa-thumbs-o-down dislike-btn"
-                            <?php endif ?>
-                            data-id="<?php echo $post['id'] ?>"></i>
-                          <span class="dislikes"><?php echo getDislikes($post['id']); ?></span>
-                  </div>
+                        data-id="<?php echo $post['id'] ?>"></i>
+                       
+                        <span class="likes"><?php   echo getLikes($post['id']); ?></span>
+                      
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+
+                    <!-- if user dislikes post, style button differently -->
+                      <i 
+                        <?php if (userDisliked($post['id'])): ?>
+                          class="fa fa-thumbs-down dislike-btn"
+                        <?php else: ?>
+                          class="fa fa-thumbs-o-down dislike-btn"
+                        <?php endif ?>
+                        data-id="<?php echo $post['id'] ?>"></i>
+                      <span class="dislikes"><?php echo getDislikes($post['id']); ?></span>
               </div>
-
-                
-                <form class="clearfix" action="index.php" method="post" 
-                  id="comment_form_<?php echo $post['id'] ?>" data-id="<?php echo $post['id']; ?>"> 
-                  <textarea name="comment_text" id="comment_text_<?php echo $post['id'] ?>" class="form-control" cols="30" rows="1"></textarea>
-                  <button name="submit" class="btn btn-primary btn-sm pull-right" id="submit_comment"data-id="<?php echo $post['id']; ?>style:background:white">Bình luận</button>
-                </form>
-                <?php $comments=getAllCommentOfPost($post['id']);?>
-
-                  <a><span id="comments_count_<?php echo $post['id'] ?>"><?php echo count($comments) ?></span> bình luận</a>
-                  <hr>
-                 
-                  <div id="comments_wrapper_<?php echo $post['id']; ?>">
-                    <?php if (isset($comments)): ?>
-                   
-                      <?php foreach ($comments as $comment): ?>
-                     
-                      <div class="comment clearfix">
-                        <div class="comment-details">
-                        <img style="width: 30px;height: 30px; border-radius: 50%;" src="uploads/<?php echo $comment['user_id'];?>.jpg">
-                          <b><span class="comment-name"><?php echo findUserById($comment['user_id'])['username'] ?></span></b>
-                          <span class="comment-date"><?php echo date("F j, Y ", strtotime($comment["created_at"])); ?></span>
-                          <p><?php echo $comment['body']; ?></p>
-                          <a class="reply-btn"  href="#" data-id="<?php echo $comment['id']; ?>">Viết phản hồi</a>
-
-                          </div>
-
-                        <!-- trả lời bình luận -->
-                        <form style="display: none;" action="index.php" class="reply_form clearfix" id="comment_reply_form_<?php echo $comment['id'] ?>" data-id="<?php echo $comment['id']; ?>">
-                          <textarea class="form-control" name="reply_text" id="reply_text" cols="30" rows="1"></textarea>
-                          <button class="btn btn-primary btn-xs pull-right submit-reply">Bình luận</button>
-
-                        </form>
-
-                        <!-- GET ALL REPLIES -->
-                        <?php $replies = getAllRepliesOfComment($comment['id']) ?>
-                        <div class="replies_wrapper_<?php echo $comment['id']; ?>">
-                          <?php if (isset($replies)): ?>
-                            <?php foreach ($replies as $reply): ?>
-                              <!-- reply -->
-                              <div class="comment reply clearfix">
-
-                                <!-- <img src="profile.png" alt="" class="profile_pic"> -->
-                                <div class="comment-details">
-
-                                  <span class="comment-name"><b><?php echo findUserById($reply['user_id'])['username'] ?></b></span>
-                                  <span class="comment-date"><?php echo date("F j, Y ", strtotime($reply["created_at"])); ?></span>
-                                  <p style="margin-left: 40px;"><?php echo $reply['body']; ?></p>
-                                </div>
-                              </div>
-                            <?php endforeach ?>
-                          <?php endif ?>
-                        </div>
-                      </div>
-                        <!-- // comment -->
-                      <?php endforeach ?>
-                    <?php else: ?>
-                      <a>Hãy trở thành người đầu tiên bình luận về bài viết này</a>
-                    <?php endif ?>
-                  </div><!-- comments wrapper -->
-                  </div><!-- // all comments -->
-                        <!-- end comment3 -->
-                
-            
+          </div>
+          <!-- phuong_endlike -->
+              <!-- <a href="#" class="card-link">Bình luận</a> -->
+              <div class="form-inline">
+                <div>
+                  <input type="text" class="form-control" style=" border: 1px solid #ccd0d5; border-radius: 16px;" placeholder="Viết bình luận...">
+                </div>
+                  <button type="submit"class="btn btn-primary" style=" border: 1px solid #ccd0d5; border-radius: 30px;" name="postComment">Bình luận</button> 
+              </div>
             </div>
           </div>    
         <?php endforeach; ?>
-        
   </div>
   
 </div>
