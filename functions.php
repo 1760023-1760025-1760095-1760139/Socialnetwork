@@ -2,9 +2,6 @@
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-use PHPMailer\PHPMailer\SMTP;
-
-ob_start();
 
 //Load Composer's autoloader
 require 'vendor/autoload.php';
@@ -37,7 +34,7 @@ function findUserByEmail($email)
 	return $user;
 }
 
-function KiemTraTonTaiEmail($email)
+function kiemTraTonTaiEmail($email)
 {
 	GLOBAL $db;
 	$stmt = $db->query('SELECT * FROM users');
@@ -51,7 +48,7 @@ function KiemTraTonTaiEmail($email)
 	return false;
  
 }
-function KiemTraTonTaiUser($user)
+function kiemTraTonTaiUser($user)
 {
 	GLOBAL $db;
 	$stmt = $db->query('SELECT * FROM users');
@@ -146,6 +143,9 @@ function createVerifyEmail($userId,$code)
 	$stmt->execute(array($userId,$secret,$code));
 	return $secret;
 }
+
+
+
  
 function sentEmail($email,$receiver,$subject,$content)
 {
@@ -156,13 +156,13 @@ function sentEmail($email,$receiver,$subject,$content)
 		$mail->isSMTP();                                      // Set mailer to use SMTP
 		$mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
 		$mail->SMTPAuth = true;                               // Enable SMTP authentication
-		$mail->Username = 'nguyenthiyennhi27101999@gmail.com'; //cai khac cai nay ay                // SMTP username
-		$mail->Password = '312397713YN';                           // SMTP password
+		$mail->Username = 'verify.email.1660407@gmail.com';                 // SMTP username
+		$mail->Password = 'Khanhnhat@123';                           // SMTP password
 		$mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
 		$mail->Port = 587;                                    // TCP port to connect to
 		//
 		//Recipients
-		$mail->setFrom('nguyenthiyennhi27101999@gmail.com', 'PEACE');
+		$mail->setFrom('verify.email.1660407@gmail.com', '1660407 Social Network');
 		$mail->addAddress($email,$receiver);     // Add a recipient
 	
 	
@@ -393,18 +393,7 @@ function searchPostByString($string)
 	$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	return $rows;
 }
-
-
-function isFriend($user1Id, $user2Id)
-{
-    $relationship = findRelationship($user1Id, $user2Id);
-    $isFriend = count($relationship) === 2;
-    return $isFriend;
-}
-
-
-// comment post by phuong
-
+//phuong
 function getAllCommentOfPost($post_id)
 {
 	GLOBAL $db;
@@ -413,277 +402,10 @@ function getAllCommentOfPost($post_id)
 	$comments = $stmt->fetchALL(PDO::FETCH_ASSOC);
 	return $comments;
 }
-function InsetComment($post_id,$user_id,$comment_text)
+
+function isFriend($user1Id, $user2Id)
 {
-	GLOBAL $db;
-	$stmt = $db->prepare("INSERT INTO comments (post_id, user_id, body, created_at, updated_at) 
-	VALUES (?,?,?, now(), null)");
-	$stmt->execute(array($post_id,$user_id,$comment_text));
+    $relationship = findRelationship($user1Id, $user2Id);
+    $isFriend = count($relationship) === 2;
+    return $isFriend;
 }
-function getCommentsCountByPostId($post_id)//
-{
-	global $db;
-	$stmt = $db->prepare("SELECT COUNT(*) FROM comments WHERE post_id=?");
-	$stmt->execute(array($post_id));
-	$data = $stmt->fetchColumn(0);
-	return $data;
-}
-function getCommentByID($id)
-{
-	GLOBAL $db;
-	$stmt = $db->prepare('SELECT * FROM comments WHERE id=? LIMIT 1');
-	$stmt->execute(array($id));
-	$comment =  $stmt->fetch(PDO::FETCH_ASSOC);
-	return $comment;
-}
-//reply comment by phuong
-
-function getAllRepliesOfComment($comment_id)
-{
-	GLOBAL $db;
-	$stmt = $db->prepare('SELECT * FROM replies WHERE comment_id= ?');
-	$stmt->execute(array($comment_id));
-	$replies = $stmt->fetchALL(PDO::FETCH_ASSOC);
-	return $replies;
-}
-function insertReplyInComment($user_id , $comment_id, $reply_text)
-{
-	GLOBAL $db;
-	$stmt = $db->prepare("INSERT INTO replies (user_id, comment_id, body, created_at, updated_at)
-	VALUES (?,?,?, now(), null)");
-	$stmt->execute(array($user_id , $comment_id, $reply_text));
-}
-function getRepLyByID($id)
-{
-	GLOBAL $db;
-	$stmt = $db->prepare('SELECT * FROM replies WHERE id=?');
-	$stmt->execute(array($id));
-	$reply =  $stmt->fetch(PDO::FETCH_ASSOC);
-	return $reply;
-}
-
-
-date_default_timezone_set('Asia/Kolkata');
-
-function fetch_user_last_activity($user_id, $db)
-{
-	$query = "
-	SELECT * FROM login_details 
-	WHERE user_id = '$user_id' 
-	ORDER BY last_activity DESC 
-	LIMIT 1
-	";
-	$statement = $db->prepare($query);
-	$statement->execute();
-	$result = $statement->fetchAll();
-	foreach($result as $row)
-	{
-		return $row['last_activity'];
-	}
-}
-
-function fetch_user_chat_history($from_user_id, $to_user_id, $db)
-{
-	$query = "
-	SELECT * FROM chat_message 
-	WHERE (from_user_id = '".$from_user_id."' 
-	AND to_user_id = '".$to_user_id."') 
-	OR (from_user_id = '".$to_user_id."' 
-	AND to_user_id = '".$from_user_id."') 
-	ORDER BY timestamp DESC
-	";
-	$statement = $db->prepare($query);
-	$statement->execute();
-	$result = $statement->fetchAll();
-	$output = '<ul class="list-unstyled">';
-	foreach($result as $row)
-	{
-		$user_name = '';
-		if($row["from_user_id"] == $from_user_id)
-		{
-			$user_name = '<b class="text-success">You</b>';
-		}
-		else
-		{
-			$user_name = '<b class="text-danger">'.get_user_name($row['from_user_id'], $db).'</b>';
-		}
-		$output .= '
-		<li style="border-bottom:1px dotted #ccc">
-			<p>'.$user_name.' - '.$row["chat_message"].'
-				<div align="right">
-					- <small><em>'.$row['timestamp'].'</em></small>
-				</div>
-			</p>
-		</li>
-		';
-	}
-	$output .= '</ul>';
-	$query = "
-	UPDATE chat_message 
-	SET status = '0' 
-	WHERE from_user_id = '".$to_user_id."' 
-	AND to_user_id = '".$from_user_id."' 
-	AND status = '1'
-	";
-	$statement = $db->prepare($query);
-	$statement->execute();
-	return $output;
-}
-
-function get_user_name($user_id, $db)
-{
-	$query = "SELECT username FROM login WHERE user_id = '$user_id'";
-	$statement = $db->prepare($query);
-	$statement->execute();
-	$result = $statement->fetchAll();
-	foreach($result as $row)
-	{
-		return $row['username'];
-	}
-}
-
-function count_unseen_message($from_user_id, $to_user_id, $db)
-{
-	$query = "
-	SELECT * FROM chat_message 
-	WHERE from_user_id = '$from_user_id' 
-	AND to_user_id = '$to_user_id' 
-	AND status = '1'
-	";
-	$statement = $db->prepare($query);
-	$statement->execute();
-	$count = $statement->rowCount();
-	$output = '';
-	if($count > 0)
-	{
-		$output = '<span class="label label-success">'.$count.'</span>';
-	}
-	return $output;
-}
-
-function fetch_is_type_status($user_id, $db)
-{
-	$query = "
-	SELECT is_type FROM login_details 
-	WHERE user_id = '".$user_id."' 
-	ORDER BY last_activity DESC 
-	LIMIT 1
-	";	
-	$statement = $db->prepare($query);
-	$statement->execute();
-	$result = $statement->fetchAll();
-	$output = '';
-	foreach($result as $row)
-	{
-		if($row["is_type"] == 'yes')
-		{
-			$output = ' - <small><em><span class="text-muted">Typing...</span></em></small>';
-		}
-	}
-	return $output;
-}
-
-function fetch_group_chat_history($db)
-{
-	$query = "
-	SELECT * FROM chat_message 
-	WHERE to_user_id = '0'  
-	ORDER BY timestamp DESC
-	";
-
-	$statement = $db->prepare($query);
-
-	$statement->execute();
-
-	$result = $statement->fetchAll();
-
-	$output = '<ul class="list-unstyled">';
-	foreach($result as $row)
-	{
-		$user_name = '';
-		if($row["from_user_id"] == $_SESSION["user_id"])
-		{
-			$user_name = '<b class="text-success">You</b>';
-		}
-		else
-		{
-			$user_name = '<b class="text-danger">'.get_user_name($row['from_user_id'], $db).'</b>';
-		}
-
-		$output .= '
-
-		<li style="border-bottom:1px dotted #ccc">
-			<p>'.$user_name.' - '.$row['chat_message'].' 
-				<div align="right">
-					- <small><em>'.$row['timestamp'].'</em></small>
-				</div>
-			</p>
-		</li>
-		';
-	}
-	$output .= '</ul>';
-	return $output;
-}
-
-
-
-function getBaseUrl(){
-	if(isset($_SERVER['HTTPS'])){
-        $protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
-    }
-    else{
-        $protocol = 'http';
-    }
-    return $protocol . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-}
-
-function getPageTitle($page,$userId){
-	$title = 'PEACE';
-	if ($page === 'index')
-  {
-    $title = 'Trang chủ';
-  }
-  else if ($page === 'login')
-  {
-    $title = 'Đăng nhập';
-  }
-  else if ($page === 'register')
-  {
-    $title = 'Đăng ký';
-  }
-  else if ($page === 'personal')
-  {
-    $title = 'Trang cá nhân';
-  }
-  else if ($page === 'profile' || $page ==='listfriend')
-  {
-    $usernameProfile = findUserById($userId);
-    $title = $usernameProfile['username'];
-  }
-  else if ($page === 'forgot-password')
-  {
-    $title = 'Quên mật khẩu';
-  }
-  else if ($page === 'reset-password')
-  {
-    $title = 'Đổi mật khẩu';
-  }
-  else if ($page === 'search-friend')
-  {
-    $title='Tìm kiếm';
-  }
-  else if($page ==='verify-email')
-  {
-    $title ='Xác thực tài khoản';
-  }
-  else if ($page='result')
-  {
-    $title= 'Kết quả tìm kiếm';
-  }
-  else if ($page === 'messenger')
-  {
-    $title = 'Messenger';
-  }
-  return $title;
-}
-ob_flush();
