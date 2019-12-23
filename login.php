@@ -69,8 +69,8 @@ if($currentUser)
 		?>
 				<br>
 				<div style="text-align: center;color:black">
-				<a href="register.php" >Chưa có tài khoản? Đăng ký ngay!</a><br>	
-				<a href="forgot-password.php" >Quên mật khẩu!</a>
+				<a href="register.php">Đăng ký!</a><br>	
+				<a href="forgot-password.php" >Quên mật khẩu?</a>
 				</div>
 	</form>
  </div>
