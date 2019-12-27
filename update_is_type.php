@@ -1,7 +1,5 @@
 <?php
 
-//update_is_type_status.php
-
 include('init.php');
 
 session_start();

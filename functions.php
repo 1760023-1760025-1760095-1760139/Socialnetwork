@@ -5,7 +5,7 @@ use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
 
 ob_start();
-
+require 'config.php';
 require 'vendor/autoload.php';
 
 function findUserById($id)
@@ -74,11 +74,11 @@ function KiemTraTonTaiUser($user)
  }
 
 
-function addPost($userId,$content,$privacyNum)
+function addPost($userId,$content,$privacyNum,$image)
 {
 	GLOBAL $db;
-	$stmt = $db->prepare("INSERT INTO post(userId,content,privacy) VALUES(?,?,?)");
-	$stmt->execute(array($userId,$content,$privacyNum));	
+	$stmt = $db->prepare("INSERT INTO post(userId,content,privacy,image) VALUES(?,?,?,?)");
+	$stmt->execute(array($userId,$content,$privacyNum,$image));
 }
 
 function addPicture($userId,$content,$pictureId)
@@ -97,6 +97,16 @@ function findAllPost()
 	return $posts;
 	
 }
+
+function findUserByPostId($postId)
+{
+    GLOBAL $db;
+    $stmt = $db->prepare('SELECT userId FROM post WHERE id = '.$postId );
+    $stmt->execute();
+    $userID = $stmt->fetchALL(PDO::FETCH_ASSOC);
+    return $userID;
+}
+
 
 
 function randomString($length)
@@ -147,14 +157,14 @@ function sentEmail($email,$receiver,$subject,$content)
 		$mail->isSMTP();                                      
 		$mail->Host = 'smtp.gmail.com';  
 		$mail->SMTPAuth = true;                               
-		$mail->Username = 'nguyenthiyennhi27101999@gmail.com'; 
-		$mail->Password = '312397713YN';                           
+		$mail->Username = 'khanhnhatclone@gmail.com';
+		$mail->Password = 'chauvankhanhnhat1997';
 		$mail->SMTPSecure = 'tls';                            
 		$mail->Port = 587;                                    
 		
 
 		//Recipients
-		$mail->setFrom('nguyenthiyennhi27101999@gmail.com', 'PEACE');
+		$mail->setFrom('khanhnhatclone@gmail.com', 'PEACE');
 		$mail->addAddress($email,$receiver);     
 		$mail->isHTML(true);
 		$mail->Subject = $subject;
@@ -470,7 +480,7 @@ function fetch_user_chat_history($from_user_id, $to_user_id, $db)
 	AND to_user_id = '".$to_user_id."') 
 	OR (from_user_id = '".$to_user_id."' 
 	AND to_user_id = '".$from_user_id."') 
-	ORDER BY timestamp DESC
+	ORDER BY timestamp ASC
 	";
 	$statement = $db->prepare($query);
 	$statement->execute();
@@ -481,21 +491,23 @@ function fetch_user_chat_history($from_user_id, $to_user_id, $db)
 		$user_name = '';
 		if($row["from_user_id"] == $from_user_id)
 		{
-			$user_name = '<b class="text-success">You</b>';
+            $output .= '<li class="message-list-li">
+                            <span class="message-list message-from-me">
+                                <p class="message-list-content">'.$row["chat_message"].'</p>
+                            </span>
+                        </li>
+                        ';
 		}
 		else
 		{
-			$user_name = '<b class="text-danger">'.get_user_name($row['from_user_id'], $db).'</b>';
+            $output .= '<li class="message-list-li">
+                            <span class="message-list message-from-friend">
+                                <p class="message-list-content">'.$row["chat_message"].'</p>
+                            </span>
+                        </li>
+                        ';
 		}
-		$output .= '
-		<li style="border-bottom:1px dotted #ccc">
-			<p>'.$user_name.' - '.$row["chat_message"].'
-				<div align="right">
-					- <small><em>'.$row['timestamp'].'</em></small>
-				</div>
-			</p>
-		</li>
-		';
+
 	}
 	$output .= '</ul>';
 	$query = "
@@ -510,9 +522,21 @@ function fetch_user_chat_history($from_user_id, $to_user_id, $db)
 	return $output;
 }
 
+function fetch_user_notification($userID, $type)
+{
+    GLOBAL $db;
+    $query = "
+	SELECT * FROM notification WHERE userId = ".$userID." and `type`= ".$type."
+	ORDER  BY createAt DESC";
+    $statement = $db->prepare($query);
+    $statement->execute();
+    $result = $statement->fetchAll();
+    return $result;
+}
+
 function get_user_name($user_id, $db)
 {
-	$query = "SELECT username FROM login WHERE user_id = '$user_id'";
+	$query = "SELECT username FROM users WHERE id = ". $user_id;
 	$statement = $db->prepare($query);
 	$statement->execute();
 	$result = $statement->fetchAll();
@@ -666,4 +690,24 @@ function getPageTitle($page,$userId){
   }
   return $title;
 }
+
+function addNotification($receiver, $type, $code, $creator, $content, $collect_link)
+{
+
+    GLOBAL $db;
+    $stmt = $db->prepare('INSERT INTO notification (userId,type,code,creator,content,collection_link) VALUES(?,?,?,?,?,?)');
+    $stmt->execute(array($receiver, $type, $code, $creator, $content, $collect_link));
+}
+
+
+function removeNotification($receiver, $type, $code, $creator)
+{
+
+    GLOBAL $db;
+    $stmt = $db->prepare('DELETE FROM notification WHERE userId = ? and type = ? and code = ? and creator = ?');
+    $stmt->execute(array($receiver, $type, $code, $creator));
+}
+
+
+
 ob_flush();

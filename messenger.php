@@ -1,71 +1,30 @@
-<!--
-//index.php
-!-->
-<?php 
+<?php
   require_once 'init.php';
   require_once 'functions.php';
   $page = 'messenger';  
-  //session_start();
   if(!$currentUser)
   {
     header('Location: index.php');
     exit();
   } 
 ?>
-
-<html>  
-    <head>
-		<link REL="SHORTCUT ICON" HREF="./image/logo.ico">
-
-    	<script async='async' src='//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js'></script>
-		<script>
-		  (adsbygoogle = window.adsbygoogle || []).push({
-			google_ad_client: "ca-pub-4529508631166774",
-			enable_page_level_ads: true
-		  });
-		</script>
-		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Messenger</title>  
-		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-        <link rel="stylesheet" href="https://cdn.rawgit.com/mervick/emojionearea/master/dist/emojionearea.min.css">
-		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  		<script src="https://cdn.rawgit.com/mervick/emojionearea/master/dist/emojionearea.min.js"></script>
-  		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.js"></script>
-    </head>  
 	<?php include 'header.php'; ?>
-
-    <body>
-        <div class="container">
-			<br />
-			
-			<br />
-			<br />
-			<br />
-			<br />
+        <div class="container" style="margin-top:30px; ">
 			<div class="row">
 				<div class="col-md-8 col-sm-6">
-					<h4>Bạn Bè Đang Online </h4>
+					<h4>Bạn bè của bạn</h4>
 				</div>
 				<div class="col-md-2 col-sm-3">
 					<input type="hidden" id="is_active_group_chat_window" value="no" />
-					<button type="button" name="group_chat" id="group_chat" class="btn btn-warning btn-xs">Group Chat</button>
 				</div>
-				<!-- <div class="col-md-2 col-sm-3">
-					<p align="right">Hi - <?php echo $currentUser['username']; ?> - <a href="logout.php">Logout</a></p>
-				</div> -->
 			</div>
 			<div class="table-responsive">
-				
 				<div id="user_details"></div>
 				<div id="user_model_details"></div>
 			</div>
 			<br />
 			<br />
 			<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-				<!-- webslesson_mainblogsec_Blog1_1x1_as -->
 				<ins class="adsbygoogle"
 					 style="display:block"
 					 data-ad-client="ca-pub-4529508631166774"
@@ -84,10 +43,8 @@
 		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
 		  ga('create', 'UA-87739877-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
     </body>  
 </html>
@@ -134,10 +91,8 @@
 
 <div id="group_chat_dialog" title="Group Chat">
 	<div id="group_chat_history" style="height:300px; border:1px solid #ccc; overflow-y: scroll; margin-bottom:24px; padding:16px;">
-
 	</div>
 	<div class="form-group">
-		<!--<textarea name="group_chat_message" id="group_chat_message" class="form-control"></textarea>!-->
 		<div class="chat_message_area">
 			<div id="group_chat_message" contenteditable class="form-control">
 
@@ -201,6 +156,8 @@ $(document).ready(function(){
 		modal_content += '</div><div class="form-group" align="right">';
 		modal_content+= '<button type="button" name="send_chat" id="'+to_user_id+'" class="btn btn-info send_chat">Send</button></div></div>';
 		$('#user_model_details').html(modal_content);
+        var chat_list = document.getElementById('chat_history_'+to_user_id);
+        chat_list.scrollTop = chat_list.scrollHeight;
 	}
 
 	$(document).on('click', '.start_chat', function(){
@@ -216,23 +173,28 @@ $(document).ready(function(){
 			pickerPosition:"top",
 			toneStyle: "bullet"
 		});
+
 	});
 
 	$(document).on('click', '.send_chat', function(){
 		var to_user_id = $(this).attr('id');
 		var chat_message = $('#chat_message_'+to_user_id).val();
-		$.ajax({
-			url:"insert_chat.php",
-			method:"POST",
-			data:{to_user_id:to_user_id, chat_message:chat_message},
-			success:function(data)
-			{
-				//$('#chat_message_'+to_user_id).val('');
-				var element = $('#chat_message_'+to_user_id).emojioneArea();
-				element[0].emojioneArea.setText('');
-				$('#chat_history_'+to_user_id).html(data);
-			}
-		})
+		if(chat_message){
+            $.ajax({
+                url:"insert_chat.php",
+                method:"POST",
+                data:{to_user_id:to_user_id, chat_message:chat_message},
+                success:function(data)
+                {
+                    //$('#chat_message_'+to_user_id).val('');
+                    var element = $('#chat_message_'+to_user_id).emojioneArea();
+                    element[0].emojioneArea.setText('');
+                    $('#chat_history_'+to_user_id).html(data);
+                    var chat_list = document.getElementById('chat_history_'+to_user_id);
+                    chat_list.scrollTop = chat_list.scrollHeight;
+                }
+            })
+        }
 	});
 
 	function fetch_user_chat_history(to_user_id)
@@ -243,6 +205,8 @@ $(document).ready(function(){
 			data:{to_user_id:to_user_id},
 			success:function(data){
 				$('#chat_history_'+to_user_id).html(data);
+                var chat_list = document.getElementById('chat_history_'+to_user_id);
+                chat_list.scrollTop = chat_list.scrollHeight;
 			}
 		})
 	}

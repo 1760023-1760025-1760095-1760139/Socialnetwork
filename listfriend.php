@@ -43,8 +43,10 @@
     <div style="margin-top: 10%;">  
       <div class="card" style="width: 80%; margin: 0 auto; text-align:center;">
         <div class="card-body">
-              <img style="width: 150px;height: 150px; border-radius: 50%;border: #003366 solid 5px;" src="uploads/<?php echo $user['id'] ;?>.jpg">
-            <p><h4><?php echo $user['username']; ?></h4></p>
+              <img style="width: 150px;height: 150px; border-radius: 50%;" src="uploads/<?php echo $user['id'] ;?>.jpg">
+            <p class="user-post-name" href="profile.php?id=<?php echo $user['id']; ?>">
+            <h4 class="user-name"><?php echo $user['username']; ?></h4>
+            </p>
             <?php if($mutualFriends != 0): ?> 
             <p><?php echo $mutualFriends; ?> bạn chung</p>
             <?php endif;?>
