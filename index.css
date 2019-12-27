@@ -1,0 +1,119 @@
+#user-name-info{
+    font-weight:bold;
+    font-size:20px;
+    font-family:sans-serif;
+    color:#385898;
+}
+#user-name-info:hover{
+    text-decoration: none;
+}
+.container-welcome{
+    width: 100%;
+    height: calc(100% - 75px);
+    background-image: url("/image/index-background.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    text-align: center;
+    margin: 0 auto;
+    padding-top: 30px;
+}
+
+
+.btn.btn-dark
+{
+    height: 40px;
+    width: 150px;
+}
+
+#message{
+    font-size: 40px;
+    font-weight: bold;
+    margin: 0;
+}
+
+#branch{
+    font-size: 110px;
+    font-weight: bolder;
+    margin: 0;
+}
+
+/*Logined in */
+
+.container{
+    margin-top: 30px;
+}
+#card-post-area{
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+#avatar-container{
+    width: 200px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+#user-avatar{
+    width: 100%;
+    min-width: 100px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.dropdown-item{
+    cursor: default;
+}
+
+
+#post-index{
+    width: 100%;
+}
+
+#post-area{
+    display: flex;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: 20px;
+}
+
+
+#input-container{
+    width: calc(100% - 150px);
+    padding: 10px 10px 10px 0;
+}
+
+#status{
+    width: 100%;
+    height: 200px;
+    border-top: none;
+    border-bottom: none;
+    border-right: none;
+    border-radius: 0px;
+    resize: none;
+    outline: none;
+    padding: 0 5px 0 15px;
+    font-size: 20px;
+}
+
+
+#status:focus{
+    border-color: unset;
+    box-shadow: none;
+}
+
+
+#choose-image-open{
+    border:1px solid #ccc;
+    background-color: white;
+}
+#choose-image-open:hover{
+    background-color: white;
+    box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.1);
+}
+
