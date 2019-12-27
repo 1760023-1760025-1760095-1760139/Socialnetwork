@@ -212,32 +212,8 @@ INSERT INTO `rating_info` (`post_id`, `user_id`, `rating_action`) VALUES
 CREATE TABLE `relationship` (
   `user1Id` int(11) NOT NULL,
   `user2Id` int(11) NOT NULL,
-  `createdAt` datetime NOT NULL
+  `createdAt` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Đang đổ dữ liệu cho bảng `relationship`
---
-
-INSERT INTO `relationship` (`user1Id`, `user2Id`, `createdAt`) VALUES
-(29, 31, '0000-00-00 00:00:00'),
-(29, 32, '0000-00-00 00:00:00'),
-(29, 38, '0000-00-00 00:00:00'),
-(29, 39, '2018-12-27 11:11:43'),
-(31, 29, '0000-00-00 00:00:00'),
-(31, 38, '0000-00-00 00:00:00'),
-(32, 29, '2018-12-21 00:00:00'),
-(32, 38, '2018-12-21 00:00:00'),
-(37, 39, '2019-01-02 19:07:22'),
-(38, 29, '2018-12-24 00:00:00'),
-(38, 31, '0000-00-00 00:00:00'),
-(38, 32, '2018-12-21 00:00:00'),
-(39, 29, '2018-12-27 11:11:43'),
-(39, 37, '2019-01-02 19:07:22'),
-(45, 46, '0000-00-00 00:00:00'),
-(46, 45, '0000-00-00 00:00:00'),
-(51, 53, '0000-00-00 00:00:00'),
-(53, 51, '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -258,32 +234,6 @@ CREATE TABLE `replies` (
 -- Đang đổ dữ liệu cho bảng `replies`
 --
 
-INSERT INTO `replies` (`id`, `user_id`, `comment_id`, `body`, `created_at`, `updated_at`) VALUES
-(44, 16, 105, 'ngon', '2018-12-31 05:25:44', NULL),
-(43, 16, 105, 'oke', '2018-12-31 05:25:23', NULL),
-(42, 16, 105, 'true', '2018-12-31 05:24:11', NULL),
-(41, 16, 105, 'chay', '2018-12-31 05:23:34', NULL),
-(45, 16, 108, 'đúng rồi, nó là con chó nhật', '2018-12-31 05:41:49', NULL),
-(46, 16, 108, 'con chó pug', '2018-12-31 05:42:11', NULL),
-(47, 16, 109, 'test reply', '2018-12-31 05:43:25', NULL),
-(48, 16, 110, 'what', '2018-12-31 05:44:44', NULL),
-(49, 16, 110, 'what', '2018-12-31 05:45:10', NULL),
-(50, 16, 110, 'what', '2018-12-31 05:45:10', NULL),
-(51, 16, 110, 'what', '2018-12-31 05:45:10', NULL),
-(52, 16, 110, 'haizz', '2018-12-31 05:45:18', NULL),
-(53, 16, 111, 'reply lại đéo ngon là sao', '2018-12-31 05:49:23', NULL),
-(54, 16, 111, 'thề là nó phải chạy', '2018-12-31 05:51:38', NULL),
-(55, 16, 112, 'con chó ở nhật', '2018-12-31 12:26:25', NULL),
-(56, 16, 112, 'đúng rồi đó con chó nhật\n', '2018-12-31 12:26:51', NULL),
-(57, 39, 113, 'hee', '2019-01-02 02:42:56', NULL),
-(58, 39, 113, 'hi', '2019-01-02 02:43:11', NULL),
-(59, 39, 114, 'test', '2019-01-02 09:57:44', NULL),
-(60, 45, 116, 'gau gau\n', '2019-12-13 16:33:03', NULL),
-(61, 45, 116, '', '2019-12-13 16:33:04', NULL),
-(62, 45, 116, 'ui xin the', '2019-12-13 16:33:11', NULL),
-(63, 45, 116, 'dasdad', '2019-12-13 16:33:25', NULL),
-(64, 51, 125, 'sewwwwwwww', '2019-12-15 06:00:08', NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -298,19 +248,6 @@ CREATE TABLE `resetpassword` (
   `createAt` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Đang đổ dữ liệu cho bảng `resetpassword`
---
-
-INSERT INTO `resetpassword` (`id`, `userId`, `secret`, `used`, `createAt`) VALUES
-(23, 29, 'Rp2LW3SxkT', 1, '2018-11-19 14:12:41'),
-(24, 29, 'PBkDrqe3Mf', 1, '2018-11-19 14:14:30'),
-(25, 45, '6fk5cqIycp', 0, '2019-12-13 23:14:54'),
-(26, 45, 'NihR72yCYZ', 0, '2019-12-13 23:28:49'),
-(27, 45, 'TK1tzSVcID', 0, '2019-12-13 23:29:24'),
-(28, 45, 'bcWEflvAcS', 0, '2019-12-13 23:30:09'),
-(29, 45, 'wXG5tghJqC', 0, '2019-12-13 23:31:21'),
-(30, 45, 'hMtewpCrOh', 1, '2019-12-13 23:32:16');
 
 -- --------------------------------------------------------
 
@@ -325,20 +262,6 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `verified` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Đang đổ dữ liệu cho bảng `users`
---
-
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `verified`) VALUES
-(57, 'daoto', 'daoto990611@gmail.com', '$2y$10$bcvYPBmGUEoVwcObcgp.FOkYQMHCPM8UjkJlVWtTuKcvaGf6MXmey', 1),
-(58, 'test', 'poi05972@bcaoo.com', '$2y$10$TwhzAeCWkPzaXukHITJj5urHxkt9a4QK9vACz41DMUIprltfgoIhG', 0),
-(59, 'teattt', 'uto76199@bcaoo.com', '$2y$10$WjQmerX6UO1TUVyLgIE1munpgf30uywvBSRBc3zZ7Jodj0MZK9QKi', 0),
-(60, 'tesrwqrq', 'glb31109@zzrgg.com', '$2y$10$R8USSFxruvmGvcm0jNywb.Cu13e3w6ZTD2myUdDjpOprJ8WiPA01O', 0),
-(61, 'ndsmhsdkah', 'hee67591@eveav.com', '$2y$10$ndQ99WdetxAlmVZbASvN0uxXDftTVS36xnv/gcl2h7hVI5c4ygMEW', 0),
-(62, 'dkhdkjahd', 'pyr17396@bcaoo.com', '$2y$10$NvHX8/aiUbjeY4uB8yB24eVDRE/bOYIoicXrDtxrfNFNuAbhj0Ihe', 0),
-(63, 'qq3q3', 'sfu57005@zzrgg.com', '$2y$10$drF.K//zte9l5vLPVVD.xuEYA1yV8gftcxdZalaKaFKeNXOqQD4PW', 1),
-(64, 'hoang dai', 'hoangdai199900@gmail.com', '$2y$10$Jn0sSNaJADImZQ/625uXLOd2c.VkaVADiG18J96XkTbnrJPfI5HcK', 1);
 
 -- --------------------------------------------------------
 
@@ -355,28 +278,18 @@ CREATE TABLE `verifyemail` (
   `createAt` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Đang đổ dữ liệu cho bảng `verifyemail`
---
 
-INSERT INTO `verifyemail` (`id`, `userId`, `secret`, `code`, `used`, `createAt`) VALUES
-(5, 43, 'brFoHdPrjU', '262865', 0, '2019-12-13 23:10:16'),
-(6, 44, 'TCg9UbZLtw', '725153', 0, '2019-12-13 23:10:58'),
-(9, 47, 'KAgb3mdKcq', '745331', 0, '2019-12-15 12:43:17'),
-(10, 48, 'xJXv7jXiH4', '244374', 0, '2019-12-15 12:44:23'),
-(11, 49, 'VznH8wntnu', '080155', 0, '2019-12-15 12:45:17'),
-(12, 50, '3JYXJeLiPT', '825134', 0, '2019-12-15 12:47:27'),
-(16, 54, '0kwj0kYSlO', '219166', 0, '2019-12-15 13:21:16'),
-(17, 55, 'r19kBTFuO7', '342187', 0, '2019-12-15 13:26:03'),
-(20, 58, 'IO3UyFg14k', '196363', 0, '2019-12-15 13:55:13'),
-(21, 59, 'yDSEPmmp45', '782233', 0, '2019-12-15 13:57:28'),
-(22, 60, 'BxiVIrzF7q', '393140', 0, '2019-12-15 13:59:54'),
-(23, 61, 'sBE9GTPytp', '274659', 0, '2019-12-15 14:02:37'),
-(24, 62, '0GCajnGtSL', '682271', 0, '2019-12-15 14:05:57');
+CREATE TABLE `notification` (
+  `id` int(11) NOT NULL,
+  `userId` int(11) NOT NULL,
+  `type` int(11) NOT NULL,
+  `code` varchar(20) NOT NULL,
+  `creator` int(11) NOT NULL,
+  `content` varchar(255) NOT NULL,
+  `collection_link` varchar(255) NOT NULL,
+  `createAt` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Chỉ mục cho các bảng đã đổ
---
 
 --
 -- Chỉ mục cho bảng `chat_message`
@@ -438,6 +351,9 @@ ALTER TABLE `users`
 ALTER TABLE `verifyemail`
   ADD PRIMARY KEY (`id`);
 
+
+ALTER TABLE `notification`
+  ADD PRIMARY KEY (`id`);
 --
 -- AUTO_INCREMENT cho các bảng đã đổ
 --
@@ -489,6 +405,13 @@ ALTER TABLE `users`
 --
 ALTER TABLE `verifyemail`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+COMMIT;
+
+--
+-- AUTO_INCREMENT cho bảng `notification`
+--
+ALTER TABLE `notification`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
