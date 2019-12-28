@@ -5,7 +5,7 @@ use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
 
 ob_start();
-require 'config.php';
+
 require 'vendor/autoload.php';
 
 function findUserById($id)
@@ -157,14 +157,14 @@ function sentEmail($email,$receiver,$subject,$content)
 		$mail->isSMTP();                                      
 		$mail->Host = 'smtp.gmail.com';  
 		$mail->SMTPAuth = true;                               
-		$mail->Username = 'khanhnhatclone@gmail.com';
-		$mail->Password = 'chauvankhanhnhat1997';
+		$mail->Username = 'nguyenthiyennhi27101999@gmail.com';
+		$mail->Password = '312397713YN';
 		$mail->SMTPSecure = 'tls';                            
 		$mail->Port = 587;                                    
 		
 
 		//Recipients
-		$mail->setFrom('khanhnhatclone@gmail.com', 'PEACE');
+		$mail->setFrom('nguyenthiyennhi27101999@gmail.com', 'PEACE');
 		$mail->addAddress($email,$receiver);     
 		$mail->isHTML(true);
 		$mail->Subject = $subject;
@@ -708,6 +708,13 @@ function removeNotification($receiver, $type, $code, $creator)
     $stmt->execute(array($receiver, $type, $code, $creator));
 }
 
-
+function findPostById($id)
+{
+    GLOBAL $db;
+    $stmt = $db->prepare('SELECT * FROM post WHERE id = ? LIMIT 1');
+    $stmt->execute(array($id));
+    $user =  $stmt->fetch(PDO::FETCH_ASSOC);
+    return $user;
+}
 
 ob_flush();
